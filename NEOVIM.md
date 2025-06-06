@@ -1,6 +1,6 @@
-# nvim-theme-switcher
+# Neovim Integration
 
-A Neovim plugin that automatically syncs your editor theme with the system theme using the `theme-switcher` daemon.
+This repository includes a Neovim plugin that automatically syncs your editor theme with the system theme using the `theme-switcher` daemon.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ A Neovim plugin that automatically syncs your editor theme with the system theme
 
 ```lua
 {
-  'your-username/nvim-theme-switcher',
+  'ThisIsMani/theme-switcher',
   config = function()
     require('theme-switcher').setup({
       schemes = {
@@ -30,7 +30,7 @@ A Neovim plugin that automatically syncs your editor theme with the system theme
 
 ```lua
 use {
-  'your-username/nvim-theme-switcher',
+  'ThisIsMani/theme-switcher',
   config = function()
     require('theme-switcher').setup({
       schemes = {

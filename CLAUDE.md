@@ -70,10 +70,11 @@ cargo clippy
    - Located at: `$XDG_RUNTIME_DIR/theme-switcher.sock` or `/tmp/theme-switcher.sock`
    - Protocol: Sends theme name (`light` or `dark`) followed by newline
 
-4. **Neovim Plugin** - Located in `nvim-theme-switcher/`:
+4. **Neovim Plugin** - Located in `lua/theme-switcher/`:
    - Connects to IPC socket using `nc` (netcat)
    - Automatically syncs Neovim colorscheme with system theme
    - Configurable theme mappings and callbacks
+   - Repository can be used directly as a Neovim plugin
 
 ### Dependencies
 - `cocoa` - macOS Cocoa API bindings

@@ -4,8 +4,7 @@
 -- For lazy.nvim users:
 return {
 	{
-		dir = vim.fn.expand("~/Documents/theme-switcher/nvim-theme-switcher"),
-		name = "theme-switcher",
+		"ThisIsMani/theme-switcher",
 		config = function()
 			require("theme-switcher").setup({
 				schemes = {

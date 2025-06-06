@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::sync::{Arc, RwLock};
 use tokio::net::{UnixListener, UnixStream};
 use tokio::io::{AsyncWriteExt, AsyncBufReadExt, BufReader};
 use tokio::sync::broadcast;
@@ -7,6 +8,7 @@ use crate::{Theme, config};
 pub struct IpcServer {
     socket_path: String,
     sender: broadcast::Sender<Theme>,
+    current_theme: Arc<RwLock<Theme>>,
 }
 
 impl IpcServer {
@@ -31,11 +33,22 @@ impl IpcServer {
         Ok(Self {
             socket_path,
             sender,
+            current_theme: Arc::new(RwLock::new(Theme::Dark)), // Default, will be updated
         })
     }
 
     pub fn get_broadcaster(&self) -> broadcast::Sender<Theme> {
         self.sender.clone()
+    }
+    
+    pub fn set_current_theme(&self, theme: Theme) {
+        if let Ok(mut current) = self.current_theme.write() {
+            *current = theme;
+        }
+    }
+    
+    pub fn get_current_theme_state(&self) -> Arc<RwLock<Theme>> {
+        self.current_theme.clone()
     }
 
     pub async fn start(&self) -> Result<(), Box<dyn Error>> {
@@ -50,13 +63,15 @@ impl IpcServer {
         }
 
         let sender = self.sender.clone();
+        let current_theme = self.current_theme.clone();
 
         tokio::spawn(async move {
             loop {
                 match listener.accept().await {
                     Ok((stream, _)) => {
                         let sender = sender.clone();
-                        tokio::spawn(handle_client(stream, sender));
+                        let current_theme = current_theme.clone();
+                        tokio::spawn(handle_client(stream, sender, current_theme));
                     }
                     Err(e) => {
                         eprintln!("Error accepting connection: {}", e);
@@ -73,12 +88,16 @@ impl IpcServer {
     }
 }
 
-async fn handle_client(mut stream: UnixStream, sender: broadcast::Sender<Theme>) {
+async fn handle_client(mut stream: UnixStream, sender: broadcast::Sender<Theme>, current_theme: Arc<RwLock<Theme>>) {
     let mut receiver = sender.subscribe();
     
     // Send current theme immediately upon connection
-    if let Ok(current_theme) = receiver.recv().await {
-        let _ = stream.write_all(format!("{}\n", current_theme).as_bytes()).await;
+    let theme_to_send = {
+        current_theme.read().ok().map(|t| *t)
+    };
+    
+    if let Some(theme) = theme_to_send {
+        let _ = stream.write_all(format!("{}\n", theme).as_bytes()).await;
     }
 
     // Create a reader for incoming commands
@@ -118,16 +137,21 @@ async fn handle_client(mut stream: UnixStream, sender: broadcast::Sender<Theme>)
 
 pub struct IpcHandler {
     sender: broadcast::Sender<Theme>,
+    current_theme: Arc<RwLock<Theme>>,
 }
 
 impl IpcHandler {
-    pub fn new(sender: broadcast::Sender<Theme>) -> Self {
-        Self { sender }
+    pub fn new(sender: broadcast::Sender<Theme>, current_theme: Arc<RwLock<Theme>>) -> Self {
+        Self { sender, current_theme }
     }
 }
 
 impl crate::handlers::ThemeHandler for IpcHandler {
     fn on_theme_change(&self, theme: Theme) {
+        // Update current theme
+        if let Ok(mut current) = self.current_theme.write() {
+            *current = theme;
+        }
         // Broadcast to all connected clients
         let _ = self.sender.send(theme);
     }

@@ -49,7 +49,10 @@ async fn run_async(args: Args) -> Result<(), Box<dyn Error>> {
         server.start().await?;
         
         // Add IPC handler to composite
-        composite.add_handler(Arc::new(IpcHandler::new(server.get_broadcaster())));
+        composite.add_handler(Arc::new(IpcHandler::new(
+            server.get_broadcaster(),
+            server.get_current_theme_state()
+        )));
         
         Some(server)
     } else {
@@ -141,10 +144,10 @@ async fn run_async(args: Args) -> Result<(), Box<dyn Error>> {
         use crate::platform::MacOSApplication;
         let app = MacOSApplication::new(handler)?;
         
-        // If IPC is enabled, send initial theme
+        // If IPC is enabled, set initial theme
         if let Some(ref server) = ipc_server {
             let current_theme = app.get_current_theme();
-            let _ = server.get_broadcaster().send(current_theme);
+            server.set_current_theme(current_theme);
         }
         
         // Run the app

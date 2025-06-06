@@ -45,12 +45,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     
     let args = Args::parse();
     
-    // Use async runtime if IPC is enabled
-    if args.ipc {
-        return async_runtime::run_with_tokio(args);
-    }
-    
-    // Load config file if specified
+    // Load config file early to check for IPC setting
     let config = if let Some(ref config_path) = args.config {
         config::log_info(&format!("Loading config from: {:?}", config_path));
         Some(Config::load_from_file(config_path)?)
@@ -67,6 +62,13 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             None
         }
     };
+    
+    // Use async runtime if IPC is enabled (command line takes precedence)
+    let ipc_enabled = args.ipc || config.as_ref().map(|c| c.general.ipc).unwrap_or(false);
+    if ipc_enabled {
+        config::log_info("IPC is enabled, starting with async runtime");
+        return async_runtime::run_with_tokio(args);
+    }
     
     // Set quiet mode globally (command line takes precedence)
     let quiet = args.quiet || config.as_ref().map(|c| c.general.quiet).unwrap_or(false);

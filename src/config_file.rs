@@ -20,6 +20,9 @@ pub struct GeneralConfig {
     
     #[serde(default)]
     pub log_file: Option<PathBuf>,
+    
+    #[serde(default)]
+    pub ipc: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -61,6 +64,7 @@ impl Default for GeneralConfig {
         Self {
             quiet: false,
             log_file: None,
+            ipc: false,
         }
     }
 }

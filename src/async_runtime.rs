@@ -43,8 +43,9 @@ async fn run_async(args: Args) -> Result<(), Box<dyn Error>> {
         composite.add_handler(Arc::new(LoggingThemeHandler));
     }
     
-    // Setup IPC if requested
-    let ipc_server = if args.ipc {
+    // Setup IPC if requested (command line takes precedence over config)
+    let ipc_enabled = args.ipc || config.as_ref().map(|c| c.general.ipc).unwrap_or(false);
+    let ipc_server = if ipc_enabled {
         let server = IpcServer::new()?;
         server.start().await?;
         

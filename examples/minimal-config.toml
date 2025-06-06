@@ -1,0 +1,13 @@
+# Minimal configuration example
+
+[general]
+quiet = true  # Run silently in background
+
+[scripts]
+# Simple shell scripts
+light = ["~/bin/light-mode.sh"]
+dark = ["~/bin/dark-mode.sh"]
+
+[lua_scripts]
+# Single Lua script that handles both themes
+any = ["~/bin/theme-handler.lua"]

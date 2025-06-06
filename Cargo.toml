@@ -1,0 +1,15 @@
+[package]
+name = "theme-switcher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cocoa = "0.25"
+objc = "0.2"
+objc_id = "0.1"
+lazy_static = "1.4"
+clap = { version = "4.4", features = ["derive"] }
+mlua = { version = "0.9", features = ["lua54", "vendored"] }
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+dirs = "5.0"

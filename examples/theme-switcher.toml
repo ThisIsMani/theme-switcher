@@ -1,0 +1,53 @@
+# Example theme-switcher configuration file
+# Default location: ~/.config/theme-switcher/config.toml
+# Or specify with: theme-switcher --config /path/to/config.toml
+
+[general]
+# Run in quiet mode (suppress informational output)
+quiet = false
+
+# Log file path (optional)
+# log_file = "/tmp/theme-switcher.log"
+
+[scripts]
+# Shell scripts to execute on theme changes
+# You can specify multiple scripts for each event
+
+# Scripts to run when switching to light theme
+light = [
+    "examples/light_theme.sh",
+    "~/scripts/set_light_wallpaper.sh"
+]
+
+# Scripts to run when switching to dark theme
+dark = [
+    "examples/dark_theme.sh",
+    "~/scripts/set_dark_wallpaper.sh"
+]
+
+# Scripts to run on any theme change
+any = [
+    "~/scripts/notify_theme_change.sh"
+]
+
+[lua_scripts]
+# Lua scripts to execute on theme changes
+# These have access to the theme_switcher API
+
+# Lua scripts for light theme
+light = [
+    "examples/vscode_theme.lua",
+    "~/scripts/update_app_configs.lua"
+]
+
+# Lua scripts for dark theme
+dark = [
+    "examples/vscode_theme.lua",
+    "~/scripts/update_app_configs.lua"
+]
+
+# Lua scripts for any theme change
+any = [
+    "examples/terminal_theme.lua",
+    "examples/theme_change.lua"
+]

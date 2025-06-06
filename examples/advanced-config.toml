@@ -1,0 +1,80 @@
+# Advanced configuration with multiple integrations
+
+[general]
+quiet = false
+# log_file = "~/.local/share/theme-switcher/theme-switcher.log"
+
+[scripts]
+# Shell scripts for system-level changes
+light = [
+    # Wallpaper
+    "~/scripts/wallpaper/set-light-wallpaper.sh",
+    
+    # System sounds
+    "~/scripts/audio/light-theme-sound.sh",
+    
+    # Menu bar icons
+    "~/scripts/ui/light-menubar.sh"
+]
+
+dark = [
+    # Wallpaper
+    "~/scripts/wallpaper/set-dark-wallpaper.sh",
+    
+    # System sounds  
+    "~/scripts/audio/dark-theme-sound.sh",
+    
+    # Menu bar icons
+    "~/scripts/ui/dark-menubar.sh"
+]
+
+any = [
+    # Log theme changes
+    "~/scripts/logging/log-theme-change.sh",
+    
+    # Sync with cloud services
+    "~/scripts/sync/sync-theme-preference.sh"
+]
+
+[lua_scripts]
+# Lua scripts for application-specific changes
+light = [
+    # Development environments
+    "~/scripts/dev/vscode-light.lua",
+    "~/scripts/dev/intellij-light.lua",
+    "~/scripts/dev/sublime-light.lua",
+    
+    # Terminal emulators
+    "~/scripts/terminal/iterm2-light.lua",
+    "~/scripts/terminal/alacritty-light.lua",
+    
+    # Productivity apps
+    "~/scripts/apps/obsidian-light.lua",
+    "~/scripts/apps/notion-light.lua"
+]
+
+dark = [
+    # Development environments
+    "~/scripts/dev/vscode-dark.lua",
+    "~/scripts/dev/intellij-dark.lua", 
+    "~/scripts/dev/sublime-dark.lua",
+    
+    # Terminal emulators
+    "~/scripts/terminal/iterm2-dark.lua",
+    "~/scripts/terminal/alacritty-dark.lua",
+    
+    # Productivity apps
+    "~/scripts/apps/obsidian-dark.lua",
+    "~/scripts/apps/notion-dark.lua"
+]
+
+any = [
+    # Notification
+    "~/scripts/notifications/theme-change-notify.lua",
+    
+    # Update all config files
+    "~/scripts/config/update-all-configs.lua",
+    
+    # Browser theme sync
+    "~/scripts/browser/sync-browser-theme.lua"
+]

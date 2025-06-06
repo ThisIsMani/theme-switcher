@@ -11,9 +11,14 @@ pub struct IpcServer {
 
 impl IpcServer {
     pub fn new() -> Result<Self, Box<dyn Error>> {
-        let socket_path = dirs::runtime_dir()
+        let socket_dir = dirs::runtime_dir()
             .or_else(|| dirs::home_dir().map(|h| h.join(".local/run")))
-            .unwrap_or_else(|| std::env::temp_dir())
+            .unwrap_or_else(|| std::env::temp_dir());
+        
+        // Create directory if it doesn't exist
+        std::fs::create_dir_all(&socket_dir)?;
+        
+        let socket_path = socket_dir
             .join("theme-switcher.sock")
             .to_string_lossy()
             .to_string();

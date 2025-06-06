@@ -43,7 +43,7 @@ cargo clippy
 
 ### Core Structure
 - `src/lib.rs` - Public API with `Theme` enum and `ThemeMonitor` trait
-- `src/main.rs` - Service entry point with event loop
+- `src/bin/theme-switcher.rs` - Binary entry point (minimal, just calls lib)
 - `src/platform/macos.rs` - macOS-specific implementation using Cocoa APIs
 
 ### Key Components

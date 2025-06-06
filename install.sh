@@ -15,7 +15,7 @@ mkdir -p "$CONFIG_DIR"
 
 # Copy binary to /usr/local/bin
 echo "Installing binary..."
-sudo cp target/release/theme-switcher /usr/local/bin/
+cp target/release/theme-switcher $HOME/.local/bin/
 
 # Create example config if it doesn't exist
 if [ ! -f "$CONFIG_DIR/config.toml" ]; then
@@ -32,8 +32,8 @@ PLIST_FILE="$LAUNCH_AGENT_DIR/com.theme-switcher.plist"
 if [ ! -f "$PLIST_FILE" ]; then
     echo "Creating LaunchAgent..."
     mkdir -p "$LAUNCH_AGENT_DIR"
-    
-    cat > "$PLIST_FILE" << EOF
+
+    cat >"$PLIST_FILE" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -42,7 +42,7 @@ if [ ! -f "$PLIST_FILE" ]; then
     <string>com.theme-switcher</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/theme-switcher</string>
+        <string>$HOME/.local/bin/theme-switcher</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -55,7 +55,7 @@ if [ ! -f "$PLIST_FILE" ]; then
 </dict>
 </plist>
 EOF
-    
+
     echo "Loading LaunchAgent..."
     launchctl load "$PLIST_FILE"
 fi

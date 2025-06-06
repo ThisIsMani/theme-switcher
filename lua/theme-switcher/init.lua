@@ -178,6 +178,13 @@ end
 function M.setup(config)
   M.configure(config)
   
+  -- Apply initial theme from early detection to prevent flash
+  local initial_theme = vim.g.theme_switcher_initial_theme
+  if initial_theme and (initial_theme == "light" or initial_theme == "dark") then
+    -- Apply theme immediately without scheduling
+    apply_theme(initial_theme)
+  end
+  
   -- Connect to socket
   if connect() then
     state.initialized = true

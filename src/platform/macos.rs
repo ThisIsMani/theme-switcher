@@ -218,6 +218,10 @@ impl MacOSApplication {
 
         Ok(Self { monitor })
     }
+    
+    pub fn get_current_theme(&self) -> Theme {
+        self.monitor.get_current_theme()
+    }
 
     fn initialize() -> Result<()> {
         unsafe {

@@ -35,6 +35,10 @@ pub struct Args {
     /// Run in quiet mode (suppress informational output)
     #[arg(short, long)]
     pub quiet: bool,
+    
+    /// Enable IPC server for Neovim integration
+    #[arg(long)]
+    pub ipc: bool,
 }
 
 impl Args {

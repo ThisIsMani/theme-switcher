@@ -10,6 +10,7 @@ A macOS background service that monitors system theme changes (light/dark mode) 
 - Execute Lua scripts with built-in API for theme handling
 - Quiet mode for background operation
 - Environment variables passed to scripts
+- IPC server for integration with other applications (e.g., Neovim)
 
 ## Installation
 
@@ -23,6 +24,11 @@ cp target/release/theme-switcher /usr/local/bin/
 ### Basic usage (with logging)
 ```bash
 theme-switcher
+```
+
+### Enable IPC server for Neovim integration
+```bash
+theme-switcher --ipc
 ```
 
 ### Run scripts on theme changes
@@ -113,10 +119,37 @@ See the `examples/` directory for:
   - Updating terminal colors (iTerm2, Terminal.app)
   - Sending system notifications
   - Complex configuration file updates
+- Integration scripts:
+  - `zellij_theme.sh` / `zellij_theme.lua` - Zellij terminal multiplexer
+  - `claude_code_theme.sh` / `claude_code_theme.lua` - Claude Code editor
 - TOML configuration examples:
   - `theme-switcher.toml` - Full example with comments
   - `minimal-config.toml` - Simple configuration
   - `advanced-config.toml` - Complex multi-app setup
+  - `nvim-config.lua` - Neovim plugin configuration
+
+## Neovim Integration
+
+A Neovim plugin is included in `nvim-theme-switcher/` that automatically syncs your editor theme with the system theme.
+
+### Quick Setup
+
+1. Start theme-switcher with IPC enabled:
+   ```bash
+   theme-switcher --ipc
+   ```
+
+2. Add the plugin to your Neovim config:
+   ```lua
+   require('theme-switcher').setup({
+     schemes = {
+       light = "tokyonight-day",
+       dark = "tokyonight-night"
+     }
+   })
+   ```
+
+See `nvim-theme-switcher/README.md` for detailed setup instructions.
 
 ## Running as a Background Service
 

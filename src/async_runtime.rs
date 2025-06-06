@@ -1,55 +1,19 @@
-#![allow(unexpected_cfgs)]
-
 use std::error::Error;
-use std::fmt;
 use std::sync::Arc;
+use tokio::runtime::Runtime;
+use crate::{cli::Args, config, config_file::Config, handlers::*, ipc::*, lua_handler::LuaHandler};
+use crate::app::Application;
 
-pub mod app;
-pub mod async_runtime;
-pub mod cli;
-pub mod config;
-pub mod config_file;
-pub mod error;
-pub mod handlers;
-pub mod ipc;
-pub mod lua_handler;
-pub mod platform;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Theme {
-    Light,
-    Dark,
+pub fn run_with_tokio(args: Args) -> Result<(), Box<dyn Error>> {
+    // Create tokio runtime
+    let runtime = Runtime::new()?;
+    
+    runtime.block_on(async {
+        run_async(args).await
+    })
 }
 
-impl fmt::Display for Theme {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Theme::Light => write!(f, "light"),
-            Theme::Dark => write!(f, "dark"),
-        }
-    }
-}
-
-pub trait ThemeMonitor {
-    fn start(&self) -> Result<(), Box<dyn Error>>;
-    fn stop(&self) -> Result<(), Box<dyn Error>>;
-    fn get_current_theme(&self) -> Theme;
-}
-
-pub fn run() -> Result<(), Box<dyn Error>> {
-    use clap::Parser;
-    use cli::Args;
-    use handlers::{CompositeThemeHandler, LoggingThemeHandler, ScriptHandler};
-    use lua_handler::LuaHandler;
-    use config_file::Config;
-    
-    let args = Args::parse();
-    
-    // Use async runtime if IPC is enabled
-    if args.ipc {
-        return async_runtime::run_with_tokio(args);
-    }
-    
+async fn run_async(args: Args) -> Result<(), Box<dyn Error>> {
     // Load config file if specified
     let config = if let Some(ref config_path) = args.config {
         config::log_info(&format!("Loading config from: {:?}", config_path));
@@ -78,6 +42,19 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     if !quiet {
         composite.add_handler(Arc::new(LoggingThemeHandler));
     }
+    
+    // Setup IPC if requested
+    let ipc_server = if args.ipc {
+        let server = IpcServer::new()?;
+        server.start().await?;
+        
+        // Add IPC handler to composite
+        composite.add_handler(Arc::new(IpcHandler::new(server.get_broadcaster())));
+        
+        Some(server)
+    } else {
+        None
+    };
     
     // Create script handler combining CLI args and config
     let mut script_handler = ScriptHandler::new();
@@ -155,8 +132,37 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         composite.add_handler(Arc::new(lua_handler));
     }
     
-    let app = platform::create_application(Arc::new(composite))?;
-    app.run()?;
-
+    // Create the app with handlers
+    let handler = Arc::new(composite);
+    
+    // Create the application
+    #[cfg(target_os = "macos")]
+    {
+        use crate::platform::MacOSApplication;
+        let app = MacOSApplication::new(handler)?;
+        
+        // If IPC is enabled, send initial theme
+        if let Some(ref server) = ipc_server {
+            let current_theme = app.get_current_theme();
+            let _ = server.get_broadcaster().send(current_theme);
+        }
+        
+        // Run the app
+        Box::new(app).run()?;
+        
+        // Cleanup IPC if it was started
+        if let Some(ref server) = ipc_server {
+            server.cleanup();
+        }
+    }
+    
+    #[cfg(not(target_os = "macos"))]
+    {
+        use crate::error::ThemeSwitcherError;
+        return Err(Box::new(ThemeSwitcherError::PlatformError(
+            "This platform is not currently supported".to_string()
+        )));
+    }
+    
     Ok(())
 }

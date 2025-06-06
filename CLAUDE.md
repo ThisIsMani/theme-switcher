@@ -17,6 +17,7 @@ cargo build --release
 ### Run
 ```bash
 cargo run
+cargo run -- --ipc  # Enable IPC server for Neovim integration
 ```
 
 ### Test
@@ -45,6 +46,10 @@ cargo clippy
 - `src/lib.rs` - Public API with `Theme` enum and `ThemeMonitor` trait
 - `src/bin/theme-switcher.rs` - Binary entry point (minimal, just calls lib)
 - `src/platform/macos.rs` - macOS-specific implementation using Cocoa APIs
+- `src/ipc.rs` - IPC server for external integrations (Unix domain socket)
+- `src/async_runtime.rs` - Tokio runtime for IPC mode
+- `src/handlers.rs` - Theme change handlers (scripts, logging, IPC)
+- `src/lua_handler.rs` - Lua script execution with theme_switcher API
 
 ### Key Components
 
@@ -59,8 +64,24 @@ cargo clippy
    - Instant theme change detection
    - Custom Objective-C bridge class for KVO callbacks
 
+3. **IPC Server** - Unix domain socket server:
+   - Broadcasts theme changes to connected clients
+   - Supports multiple simultaneous connections
+   - Located at: `$XDG_RUNTIME_DIR/theme-switcher.sock` or `/tmp/theme-switcher.sock`
+   - Protocol: Sends theme name (`light` or `dark`) followed by newline
+
+4. **Neovim Plugin** - Located in `nvim-theme-switcher/`:
+   - Connects to IPC socket using `nc` (netcat)
+   - Automatically syncs Neovim colorscheme with system theme
+   - Configurable theme mappings and callbacks
+
 ### Dependencies
 - `cocoa` - macOS Cocoa API bindings
 - `objc` - Objective-C runtime bindings
 - `objc_id` - Safe Objective-C object management
 - `lazy_static` - Runtime class registration
+- `tokio` - Async runtime for IPC server
+- `clap` - Command line argument parsing
+- `mlua` - Lua scripting support
+- `serde` + `toml` - Configuration file support
+- `dirs` - Platform-specific directory paths

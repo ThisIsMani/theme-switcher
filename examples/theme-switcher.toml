@@ -27,6 +27,8 @@ dark = [
 
 # Scripts to run on any theme change
 any = [
+    "examples/zellij_theme.sh",
+    "examples/claude_code_theme.sh",
     "~/scripts/notify_theme_change.sh"
 ]
 
@@ -48,6 +50,8 @@ dark = [
 
 # Lua scripts for any theme change
 any = [
+    "examples/zellij_theme.lua",
+    "examples/claude_code_theme.lua",
     "examples/terminal_theme.lua",
     "examples/theme_change.lua"
 ]
